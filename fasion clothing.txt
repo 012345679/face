@@ -1,51 +1,92 @@
-import tensorflow as tf
-import matplotlib.pyplot as plt
-from tensorflow import keras
-import numpy as np
-(x_train, y_train), (x_test, y_test) = keras.datasets.fashion_mnist.load_data()
-plt.imshow(x_train[1])
-x_train = x_train.astype('float32') / 255.0
-x_test = x_test.astype('float32') / 255.0
-x_train = x_train.reshape(-1, 28, 28, 1)
-x_test = x_test.reshape(-1, 28, 28, 1)
-x_train.shape
-(60000, 28, 28)
-x_test.shape
-(10000, 28, 28, 1)
-y_train.shape
-(60000,)
-y_test.shape
-(10000,)
-model = keras.Sequential([
-keras.layers.Conv2D(32, (3,3), activation='relu', input_shape=(28,28,1)),
-keras.layers.MaxPooling2D((2,2)),
-# It shown 13 * 13 size image with 32 channel or filter or depth.
-keras.layers.Dropout(0.25),
-# Reduce Overfitting of Training sample drop out 25% Neuron
-keras.layers.Conv2D(64, (3,3), activation='relu'),
-keras.layers.MaxPooling2D((2,2)),
-# It shown 5 * 5 size image with 64 channel or filter or depth.
-keras.layers.Dropout(0.25),
-keras.layers.Conv2D(128, (3,3), activation='relu'),
 
-keras.layers.Flatten(),
-keras.layers.Dense(128, activation='relu'),
-# 128 Size of Node in Dense Layer
-# 1152*128 = 147584
-keras.layers.Dropout(0.25),
-keras.layers.Dense(10, activation='softmax')
-# 10 Size of Node another Dense Layer
-# 128*10+10 bias= 1290
-])
+
+from tensorflow.keras.datasets import fashion_mnist
+     
+
+(train_x, train_y), (test_x, test_y) = fashion_mnist.load_data()
+     
+Downloading data from https://storage.googleapis.com/tensorflow/tf-keras-datasets/train-labels-idx1-ubyte.gz
+29515/29515 [==============================] - 0s 0us/step
+Downloading data from https://storage.googleapis.com/tensorflow/tf-keras-datasets/train-images-idx3-ubyte.gz
+26421880/26421880 [==============================] - 0s 0us/step
+Downloading data from https://storage.googleapis.com/tensorflow/tf-keras-datasets/t10k-labels-idx1-ubyte.gz
+5148/5148 [==============================] - 0s 0us/step
+Downloading data from https://storage.googleapis.com/tensorflow/tf-keras-datasets/t10k-images-idx3-ubyte.gz
+4422102/4422102 [==============================] - 0s 0us/step
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, MaxPooling2D, Conv2D
+     
+
+model = Sequential()
+     
+
+model.add(Conv2D(filters=64,kernel_size=(3,3),activation='relu',input_shape=(28, 28, 1)))
+
+# Adding maxpooling layer to get max value within a matrix
+model.add(MaxPooling2D(pool_size=(2,2)))
+
+model.add(Flatten())
+model.add(Dense(128, activation = "relu"))
+model.add(Dense(10, activation = "softmax"))
+     
+
 model.summary()
-Model: "sequential"
-
-Total params: 241,546
-Trainable params: 241,546
+     
+Model: "sequential_2"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ flatten_1 (Flatten)         (None, 784)               0         
+                                                                 
+ dense_8 (Dense)             (None, 128)               100480    
+                                                                 
+ dense_9 (Dense)             (None, 10)                1290      
+                                                                 
+=================================================================
+Total params: 101,770
+Trainable params: 101,770
 Non-trainable params: 0
+_________________________________________________________________
 
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-history = model.fit(x_train, y_train, epochs=10, validation_data=(x_test, y_test))
+model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'])
+     
 
-test_loss, test_acc = model.evaluate(x_test, y_test)
-print('Test accuracy:', test_acc)
+model.fit(train_x.astype(np.float32), train_y.astype(np.float32), epochs = 5, validation_split = 0.2)
+     
+Epoch 1/5
+1500/1500 [==============================] - 7s 5ms/step - loss: 0.4881 - accuracy: 0.8302 - val_loss: 0.5287 - val_accuracy: 0.8273
+Epoch 2/5
+1500/1500 [==============================] - 6s 4ms/step - loss: 0.4893 - accuracy: 0.8298 - val_loss: 0.5376 - val_accuracy: 0.8243
+Epoch 3/5
+1500/1500 [==============================] - 7s 5ms/step - loss: 0.4774 - accuracy: 0.8342 - val_loss: 0.5451 - val_accuracy: 0.8282
+Epoch 4/5
+1500/1500 [==============================] - 6s 4ms/step - loss: 0.4751 - accuracy: 0.8361 - val_loss: 0.5717 - val_accuracy: 0.8299
+Epoch 5/5
+1500/1500 [==============================] - 7s 5ms/step - loss: 0.4753 - accuracy: 0.8363 - val_loss: 0.5278 - val_accuracy: 0.8255
+<keras.callbacks.History at 0x7fbcee0aceb0>
+
+loss, acc = model.evaluate(test_x, test_y)
+     
+313/313 [==============================] - 1s 2ms/step - loss: 0.5724 - accuracy: 0.8171
+
+labels = ['t_shirt', 'trouser', 'pullover', 'dress', 'coat', 'sandal', 'shirt', 'sneaker',   'bag', 'ankle_boots']
+     
+
+predictions = model.predict(test_x[:1])
+     
+1/1 [==============================] - 0s 73ms/step
+
+import numpy as np
+     
+
+label = labels[np.argmax(predictions)]
+     
+
+import matplotlib.pyplot as plt
+print(label)
+plt.imshow(test_x[:1][0])
+plt.show
+     
+ankle_boots
+<function matplotlib.pyplot.show(close=None, block=None)>
