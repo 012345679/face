@@ -1,104 +1,99 @@
+
+
+from tensorflow.keras.datasets import imdb
+     
+
+(train_data, train_label), (test_data, test_label) = imdb.load_data(num_words = 10000)
+     
+Downloading data from https://storage.googleapis.com/tensorflow/tf-keras-datasets/imdb.npz
+17464789/17464789 [==============================] - 0s 0us/step
+
 import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from keras.datasets import imdb
-(X_train, y_train), (X_test, y_test) = imdb.load_data(num_words=10000)
 
-data = np.concatenate((X_train, X_test), axis=0) 
-label = np.concatenate((y_train, y_test), axis=0)
-X_train.shape
-(25000,)
-X_test.shape
-(25000,)
-y_train.shape
-(25000,)
-y_test.shape
-(25000,)
-print("Review is ",X_train[0]) 
-print("Review is ",y_train[0])
-vocab=imdb.get_word_index() 
-print(vocab)
-y_train
-array([1, 0, 0, ..., 0, 1, 0])
-y_test
-array([0, 1, 1, ..., 0, 0, 0])
-def vectorize(sequences, dimension = 10000):
-results = np.zeros((len(sequences), dimension))
-for i, sequence in enumerate(sequences):
-results[i, sequence] = 1
-return results
-test_x = data[:10000]
-test_y = label[:10000]
-train_x = data[10000:]
-train_y = label[10000:]
-test_x.shape
-(10000,)
-test_y.shape
-(10000,)
-train_x.shape
-(40000,)
-train_y.shape
-(40000,)
-print("Categories:", np.unique(label))
-print("Number of unique words:", len(np.unique(np.hstack(data))))
-Categories: [0 1]
-Number of unique words: 9998
-length = [len(i) for i in data]
-print("Average Review length:", np.mean(length))
-print("Standard Deviation:", round(np.std(length)))
-print("Label:", label[0])
-Label: 1
-print("Label:", label[1])
-Label: 0
-print(data[0])
-index = imdb.get_word_index() 
-reverse_index = dict([(value, key) for (key, value) in index.items()]) # id to word
-decoded = " ".join( [reverse_index.get(i - 3, "#") for i in data[0]] )
+def vectorize_sequences(sequences, dimensions = 10000):
+  results = np.zeros((len(sequences), dimensions))
+  for i,sequences in enumerate(sequences):
+    results[i, sequences] = 1
+  return results
 
-print(decoded)
+x_train = vectorize_sequences(train_data)
+y_train = vectorize_sequences(test_data)
+     
 
-data = vectorize(data)
-label = np.array(label).astype("float32")
-labelDF=pd.DataFrame({'label':label})
-sns.countplot(x='label', data=labelDF)
+y_train = np.asarray(train_label).astype('float32')
+y_test = np.asarray(test_label).astype('float32')
+     
 
-from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(data,label, test_size=0.20, random_state=1)
-X_train.shape
-(40000, 10000)
-X_test.shape
-(10000, 10000)
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+     
 
-from keras.utils import to_categorical
-from keras import models
-from keras import layers
-model = models.Sequential()
+model = Sequential()
+model.add(Dense(16, input_shape=(10000, ), activation = "relu"))
+model.add(Dense(16, activation = "relu"))
+model.add(Dense(1, activation = "sigmoid"))
+     
 
-model.add(layers.Dropout(0.3, noise_shape=None, seed=None))
-model.add(layers.Dense(50, activation = "relu"))
-model.add(layers.Dropout(0.2, noise_shape=None, seed=None))
-model.add(layers.Dense(50, activation = "relu"))
+model.compile(optimizer='adam', loss = 'mse', metrics = ['accuracy'])
+     
 
-model.add(layers.Dense(1, activation = "sigmoid"))
 model.summary()
-import tensorflow as tf
-callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=3)
+     
+Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense (Dense)               (None, 16)                160016    
+                                                                 
+ dense_1 (Dense)             (None, 16)                272       
+                                                                 
+ dense_2 (Dense)             (None, 1)                 17        
+                                                                 
+=================================================================
+Total params: 160,305
+Trainable params: 160,305
+Non-trainable params: 0
+_________________________________________________________________
 
-plt.plot(results.history['accuracy'])
-plt.plot(results.history['val_accuracy'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-plt.show()
-
-plt.plot(results.history['loss'])
-plt.plot(results.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-plt.show()
-
-
+history = model.fit(x_train, y_train, validation_split = 0.3, epochs = 20, verbose = 1, batch_size = 512)
+     
+Epoch 1/20
+35/35 [==============================] - 2s 39ms/step - loss: 0.0041 - accuracy: 0.9960 - val_loss: 0.1162 - val_accuracy: 0.8652
+Epoch 2/20
+35/35 [==============================] - 1s 35ms/step - loss: 0.0042 - accuracy: 0.9959 - val_loss: 0.1171 - val_accuracy: 0.8648
+Epoch 3/20
+35/35 [==============================] - 1s 32ms/step - loss: 0.0043 - accuracy: 0.9958 - val_loss: 0.1192 - val_accuracy: 0.8636
+Epoch 4/20
+35/35 [==============================] - 1s 31ms/step - loss: 0.0042 - accuracy: 0.9959 - val_loss: 0.1210 - val_accuracy: 0.8619
+Epoch 5/20
+35/35 [==============================] - 1s 31ms/step - loss: 0.0041 - accuracy: 0.9960 - val_loss: 0.1208 - val_accuracy: 0.8628
+Epoch 6/20
+35/35 [==============================] - 1s 42ms/step - loss: 0.0041 - accuracy: 0.9959 - val_loss: 0.1210 - val_accuracy: 0.8619
+Epoch 7/20
+35/35 [==============================] - 2s 47ms/step - loss: 0.0040 - accuracy: 0.9961 - val_loss: 0.1213 - val_accuracy: 0.8621
+Epoch 8/20
+35/35 [==============================] - 1s 31ms/step - loss: 0.0041 - accuracy: 0.9960 - val_loss: 0.1214 - val_accuracy: 0.8620
+Epoch 9/20
+35/35 [==============================] - 1s 32ms/step - loss: 0.0041 - accuracy: 0.9961 - val_loss: 0.1204 - val_accuracy: 0.8655
+Epoch 10/20
+35/35 [==============================] - 1s 32ms/step - loss: 0.0041 - accuracy: 0.9961 - val_loss: 0.1215 - val_accuracy: 0.8633
+Epoch 11/20
+35/35 [==============================] - 1s 37ms/step - loss: 0.0040 - accuracy: 0.9961 - val_loss: 0.1224 - val_accuracy: 0.8623
+Epoch 12/20
+35/35 [==============================] - 1s 32ms/step - loss: 0.0039 - accuracy: 0.9961 - val_loss: 0.1223 - val_accuracy: 0.8617
+Epoch 13/20
+35/35 [==============================] - 1s 35ms/step - loss: 0.0039 - accuracy: 0.9961 - val_loss: 0.1223 - val_accuracy: 0.8613
+Epoch 14/20
+35/35 [==============================] - 1s 36ms/step - loss: 0.0039 - accuracy: 0.9961 - val_loss: 0.1223 - val_accuracy: 0.8616
+Epoch 15/20
+35/35 [==============================] - 1s 31ms/step - loss: 0.0039 - accuracy: 0.9961 - val_loss: 0.1223 - val_accuracy: 0.8613
+Epoch 16/20
+35/35 [==============================] - 1s 38ms/step - loss: 0.0039 - accuracy: 0.9961 - val_loss: 0.1224 - val_accuracy: 0.8611
+Epoch 17/20
+35/35 [==============================] - 2s 48ms/step - loss: 0.0039 - accuracy: 0.9961 - val_loss: 0.1224 - val_accuracy: 0.8607
+Epoch 18/20
+35/35 [==============================] - 1s 37ms/step - loss: 0.0039 - accuracy: 0.9961 - val_loss: 0.1224 - val_accuracy: 0.8608
+Epoch 19/20
+35/35 [==============================] - 1s 35ms/step - loss: 0.0039 - accuracy: 0.9961 - val_loss: 0.1224 - val_accuracy: 0.8605
+Epoch 20/20
+35/35 [==============================] - 2s 60ms/step - loss: 0.0039 - accuracy: 0.9961 - val_loss: 0.1224 - val_accuracy: 0.8609
