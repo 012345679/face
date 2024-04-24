@@ -1,59 +1,78 @@
-import numpy as np
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.optimizers import RMSprop
-from tensorflow.keras.datasets import mnist
-import matplotlib.pyplot as plt
-from sklearn import metrics
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
-plt.imshow(x_train[0], cmap='gray')
-plt.show()
-print(x_train[0])
 
-print("X_train shape", x_train.shape)
-print("y_train shape", y_train.shape)
-print("X_test shape", x_test.shape)
-print("y_test shape", y_test.shape)
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score
+dataset = pd.read_csv("letter-recognition.data", sep = ",")
+X = dataset.iloc[:, 1 : 17]
+Y = dataset.select_dtypes(include = [object])
+T
+0	I
+1	D
+2	N
+3	G
+4	S
+...	...
+19994	D
+19995	C
+19996	T
+19997	S
+19998	A
+19999 rows × 1 columns
 
-X_train shape (60000, 28, 28)
-y_train shape (60000,)
-X_test shape (10000, 28, 28)
-y_test shape (10000,)
+X_train, X_validation, Y_train, Y_validation = train_test_split(X, Y, test_size = 0.20, random_state = 10)
+scaler = StandardScaler()
+scaler.fit(X_train)
+StandardScaler()
+X_train = scaler.transform(X_train)
+X_validation = scaler.transform(X_validation)
+mlp = MLPClassifier(hidden_layer_sizes = (250, 300), max_iter = 1000000, activation = 'logistic')
+from yellowbrick.classifier import confusion_matrix
+cm = confusion_matrix(mlp,X_train,Y_train, X_validation, Y_validation, classes="A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z".split(','))
+c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages\sklearn\neural_network\_multilayer_perceptron.py:1109: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)
+c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages\sklearn\preprocessing\_label.py:115: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)
 
-x_train = x_train.reshape(60000, 784)
-x_test = x_test.reshape(10000, 784)
-x_train = x_train.astype('float32') 
-
-x_test = x_test.astype('float32')
-x_train /= 255 # Each image has Intensity from 0 to 255
-x_test /= 255
-
-num_classes = 10
-y_train = np.eye(num_classes)[y_train] # Return a 2-D array with ones on the diagonal and zeros
-elsewhere.
-y_test = np.eye(num_classes)[y_test] # f your particular categories is present then it mark as 1 else 0 in
-remain row
-# Define the model architecture
-model = Sequential()
-model.add(Dense(512, activation='relu', input_shape=(784,))) # Input cosist of 784 Neuron ie 784 input,
-512 in the hidden layer
-model.add(Dropout(0.2)) # DROP OUT RATIO 20%
-model.add(Dense(512, activation='relu')) #returns a sequence of another vectors of dimension 512
-model.add(Dropout(0.2))
-model.add(Dense(num_classes, activation='softmax')) # 10 neurons ie output node in the output layer.
-# Compile the model
-model.compile(loss='categorical_crossentropy', # for a multi-class classification problem
-optimizer=RMSprop(),
-metrics=['accuracy'])
-# Train the model
-batch_size = 128 # batch_size argument is passed to the layer to define a batch size for the inputs.
-epochs = 20
-history = model.fit(x_train, y_train,
-batch_size=batch_size,
-epochs=epochs,
-verbose=1,
-score = model.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
-Test loss: 0.08541901409626007
-Test accuracy: 0.9851999878883362
+# !pip install yellowbrick
+Collecting yellowbrick
+WARNING: Ignoring invalid distribution -illow (c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages)
+WARNING: Ignoring invalid distribution -illow (c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages)
+  Downloading yellowbrick-1.5-py3-none-any.whl (282 kB)
+     -------------------------------------- 282.6/282.6 kB 1.2 MB/s eta 0:00:00
+Requirement already satisfied: matplotlib!=3.0.0,>=2.0.2 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from yellowbrick) (3.5.1)
+Requirement already satisfied: scipy>=1.0.0 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from yellowbrick) (1.7.3)
+Requirement already satisfied: scikit-learn>=1.0.0 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from yellowbrick) (1.0.2)
+Requirement already satisfied: numpy>=1.16.0 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from yellowbrick) (1.21.5)
+Requirement already satisfied: cycler>=0.10.0 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from yellowbrick) (0.11.0)
+Requirement already satisfied: fonttools>=4.22.0 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from matplotlib!=3.0.0,>=2.0.2->yellowbrick) (4.29.1)
+Requirement already satisfied: kiwisolver>=1.0.1 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from matplotlib!=3.0.0,>=2.0.2->yellowbrick) (1.3.2)
+Requirement already satisfied: packaging>=20.0 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from matplotlib!=3.0.0,>=2.0.2->yellowbrick) (21.3)
+Requirement already satisfied: pillow>=6.2.0 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from matplotlib!=3.0.0,>=2.0.2->yellowbrick) (9.5.0)
+Requirement already satisfied: pyparsing>=2.2.1 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from matplotlib!=3.0.0,>=2.0.2->yellowbrick) (3.0.7)
+Requirement already satisfied: python-dateutil>=2.7 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from matplotlib!=3.0.0,>=2.0.2->yellowbrick) (2.8.2)
+Requirement already satisfied: joblib>=0.11 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from scikit-learn>=1.0.0->yellowbrick) (1.1.0)
+Requirement already satisfied: threadpoolctl>=2.0.0 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from scikit-learn>=1.0.0->yellowbrick) (3.1.0)
+Requirement already satisfied: six>=1.5 in c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages (from python-dateutil>=2.7->matplotlib!=3.0.0,>=2.0.2->yellowbrick) (1.16.0)
+Installing collected packages: yellowbrick
+Successfully installed yellowbrick-1.5
+cm.fit(X_train, Y_train.values.ravel())
+ConfusionMatrix(ax=<AxesSubplot:title={'center':'MLPClassifier Confusion Matrix'}, xlabel='Predicted Class', ylabel='True Class'>,
+                classes=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
+                         'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+                         'W', 'X', 'Y', 'Z'],
+                cmap=<matplotlib.colors.ListedColormap object at 0x0000015FD8E45F88>,
+                estimator=MLPClassifier(activation='logistic',
+                                        hidden_layer_sizes=(250, 300),
+                                        max_iter=1000000))
+cm.score(X_validation, Y_validation)
+c:\users\lenovo\appdata\local\programs\python\python37\lib\site-packages\sklearn\preprocessing\_label.py:115: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)
+0.97625
+predictions = cm.predict(X_validation)
+predictions
+array(['C', 'I', 'H', ..., 'H', 'B', 'W'], dtype='<U1')
+print("Accuracy: ", accuracy_score(Y_validation, predictions))
+Accuracy:  0.97625
+ 
